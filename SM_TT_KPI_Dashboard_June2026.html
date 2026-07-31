@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>KPI Dashboard — June 2026</title>
+<style>
+  :root{
+    color-scheme: light;
+    --navy:#1e2a5e;
+    --navy-light:#5b6b93;
+    --green:#1a7a3c;
+    --green-bg:#eaf7ee;
+    --green-border:#bfe6cc;
+    --red:#c0392b;
+    --red-bg:#fdecea;
+    --red-border:#f3c6c1;
+    --gray-border:#e3e6ee;
+    --row-alt:#f5f6fb;
+    /* Brand colors sampled from each company's live site */
+    --sm-primary:#115fce;   /* ShowMojo blue */
+    --sm-accent:#654dff;    /* ShowMojo secondary blue/purple */
+    --sm-gold:#e4a539;      /* ShowMojo gold accent */
+    --tt-primary:#05354d;   /* Tenant Turner navy */
+    --tt-accent:#ff5500;    /* Tenant Turner orange */
+  }
+  *{box-sizing:border-box;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+    background:#f2f3f7;
+    margin:0;
+    padding:32px 16px;
+    color:#222;
+  }
+  .page{
+    max-width:1200px;
+    margin:0 auto 40px auto;
+    background:#fff;
+    border-radius:14px;
+    padding:36px 44px 40px 44px;
+    box-shadow:0 2px 10px rgba(0,0,0,0.06);
+  }
+  h1{
+    font-size:32px;
+    font-weight:800;
+    color:var(--navy);
+    margin:0 0 6px 0;
+  }
+  .subtitle{
+    font-size:17px;
+    font-weight:600;
+    color:var(--navy-light);
+    margin:0 0 18px 0;
+  }
+  .hr{
+    border:none;
+    border-top:1px solid var(--gray-border);
+    margin:0 0 26px 0;
+  }
+  /* KPI overview cards */
+  .card-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:16px;
+    margin-bottom:18px;
+  }
+  .card{
+    border:1px solid var(--gray-border);
+    border-radius:10px;
+    padding:14px 16px 16px 16px;
+    background:#fff;
+  }
+  .card .bar{
+    height:5px;
+    border-radius:3px;
+    margin-bottom:10px;
+  }
+  .card .bar.good{background:var(--green);}
+  .card .bar.bad{background:var(--red);}
+  .card .label{
+    font-size:13px;
+    font-weight:700;
+    color:var(--navy);
+    margin-bottom:6px;
+  }
+  .card .value{
+    font-size:28px;
+    font-weight:800;
+    line-height:1;
+    margin-bottom:6px;
+  }
+  .card .value.good{color:var(--green);}
+  .card .value.bad{color:var(--red);}
+  .card .goal{
+    font-size:12.5px;
+    color:#555;
+  }
+  .card.brand-sm{border-left:4px solid var(--sm-primary);}
+  .card.brand-tt{border-left:4px solid var(--tt-accent);}
+  .brand-tag{
+    display:inline-block;
+    font-size:10.5px;
+    font-weight:800;
+    letter-spacing:.03em;
+    padding:1px 7px;
+    border-radius:20px;
+    margin-left:6px;
+    vertical-align:1px;
+  }
+  .brand-tag.sm{background:#eaf1fd;color:var(--sm-primary);}
+  .brand-tag.tt{background:#fff0e6;color:var(--tt-accent);}
+  .context{
+    border:1px solid #f0dfb3;
+    background:#fdf6e3;
+    border-radius:10px;
+    padding:14px 18px;
+    font-size:14px;
+    line-height:1.55;
+    margin-top:4px;
+  }
+  .context strong{color:#7a5b00;}
+  .context ul{margin:6px 0 0 0;padding-left:20px;}
+  .context li{margin-bottom:4px;}
+
+  /* KPI analysis tables */
+  table{
+    width:100%;
+    border-collapse:collapse;
+    margin-bottom:22px;
+    font-size:14.5px;
+  }
+  thead th{
+    background:var(--navy);
+    color:#fff;
+    text-align:left;
+    padding:10px 14px;
+    font-weight:700;
+  }
+  thead th:not(:first-child){text-align:center;}
+  tbody td{
+    padding:10px 14px;
+    border-bottom:1px solid var(--gray-border);
+  }
+  tbody td:not(:first-child){text-align:center;}
+  tbody tr:nth-child(even){background:var(--row-alt);}
+  td.metric{font-weight:600;color:#222;}
+  td.good{color:var(--green);font-weight:700;}
+  td.bad{color:var(--red);font-weight:700;}
+  td.neutral{color:#333;}
+
+  .box-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:20px;
+    margin-top:4px;
+  }
+  .box{
+    border-radius:10px;
+    padding:16px 20px;
+    border:1px solid;
+  }
+  .box.highlights{background:#eefaf0;border-color:#bfe6cc;}
+  .box.lowlights{background:#fdecea;border-color:#f3c6c1;}
+  .box h3{
+    margin:0 0 8px 0;
+    font-size:16px;
+  }
+  .box.highlights h3{color:var(--green);}
+  .box.lowlights h3{color:var(--red);}
+  .box ul{margin:0;padding-left:18px;font-size:13.8px;line-height:1.55;color:#222;}
+  .box li{margin-bottom:4px;}
+
+  .section-title{
+    font-size:20px;
+    font-weight:800;
+    color:var(--navy);
+    margin:0 0 14px 0;
+    padding-top:6px;
+  }
+  .note{
+    font-size:12px;
+    color:#888;
+    margin-top:6px;
+  }
+
+  /* Brand-specific page theming */
+  .page.sm{ border-top:4px solid var(--sm-primary); }
+  .page.tt{ border-top:4px solid var(--tt-accent); }
+  .page.sm h1 .brandmark{ color:var(--sm-primary); text-decoration-color:var(--sm-primary); }
+  .page.tt h1 .brandmark{ color:var(--tt-accent); text-decoration-color:var(--tt-accent); }
+  .page.sm thead th{ background:linear-gradient(120deg, var(--sm-primary), var(--sm-accent)); }
+  .page.tt thead th{ background:var(--tt-accent); border-bottom:2px solid var(--tt-primary); }
+  table.table-sm thead th{ background:linear-gradient(120deg, var(--sm-primary), var(--sm-accent)); }
+  table.table-tt thead th{ background:var(--tt-accent); border-bottom:2px solid var(--tt-primary); }
+  .page.sm .subtitle{ color:var(--sm-primary); }
+  .page.tt .subtitle{ color:var(--tt-accent); }
+  .section-title.sm{ color:var(--sm-primary); }
+  .section-title.tt{ color:var(--tt-accent); }
+  .logo-dot{
+    display:inline-block;
+    width:12px;height:12px;
+    border-radius:3px;
+    margin-right:8px;
+    vertical-align:2px;
+  }
+  .logo-dot.sm{ background:linear-gradient(135deg, var(--sm-primary), var(--sm-accent)); }
+  .logo-dot.tt{ background:linear-gradient(135deg, var(--tt-accent), var(--tt-primary)); }
+</style>
+</head>
+<body>
+
+<!-- PAGE 1: Combined overview (filterable) -->
+<div class="page">
+  <div style="display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+    <div>
+      <h1 id="overviewTitle">June 2026 — KPI Overview</h1>
+      <p class="subtitle">Combined <span style="color:var(--sm-primary);font-weight:800;">ShowMojo</span> + <span style="color:var(--tt-accent);font-weight:800;">Tenant Turner</span> performance vs. goal</p>
+    </div>
+    <div>
+      <label for="monthSelect" style="font-size:13px;font-weight:700;color:var(--navy);margin-right:8px;">Month:</label>
+      <select id="monthSelect" style="font-size:14px;padding:8px 12px;border-radius:8px;border:1px solid var(--gray-border);font-weight:600;color:var(--navy);"></select>
+    </div>
+  </div>
+  <hr class="hr">
+
+  <div class="card-grid" id="cardGrid"></div>
+
+  <div class="context" id="contextBox"></div>
+</div>
+
+<!-- PAGE 2: ShowMojo KPI Analysis -->
+<div class="page sm">
+  <h1><span class="logo-dot sm"></span>KPI Analysis — <span class="brandmark" style="text-decoration:underline;">ShowMojo</span></h1>
+  <p class="subtitle" id="sm-subtitle">April 2026 · May 2026 · June 2026 vs. Goal</p>
+  <hr class="hr">
+
+  <table>
+    <thead>
+      <tr><th>KPI</th><th id="sm-h0">April</th><th id="sm-h1">May</th><th id="sm-h2">June</th><th id="sm-hgoal">June Goal</th><th id="sm-hyr">June 2025</th></tr>
+    </thead>
+    <tbody id="smBody"></tbody>
+  </table>
+
+  <div class="box-grid">
+    <div class="box highlights">
+      <h3>Highlights</h3>
+      <ul id="smHi"></ul>
+    </div>
+    <div class="box lowlights">
+      <h3>Lowlights</h3>
+      <ul id="smLo"></ul>
+    </div>
+  </div>
+  <p class="note">Each month is colored against that month's own goal. "N/A" appears where data isn't available that far back.</p>
+</div>
+
+<!-- PAGE 3: Tenant Turner KPI Analysis -->
+<div class="page tt">
+  <h1><span class="logo-dot tt"></span>KPI Analysis — <span class="brandmark" style="text-decoration:underline;">Tenant Turner</span></h1>
+  <p class="subtitle" id="tt-subtitle">April 2026 · May 2026 · June 2026 vs. Goal</p>
+  <hr class="hr">
+
+  <table>
+    <thead>
+      <tr><th>KPI</th><th id="tt-h0">April</th><th id="tt-h1">May</th><th id="tt-h2">June</th><th id="tt-hgoal">June Goal</th><th id="tt-hyr">June 2025</th></tr>
+    </thead>
+    <tbody id="ttBody"></tbody>
+  </table>
+
+  <div class="box-grid">
+    <div class="box highlights">
+      <h3>Highlights</h3>
+      <ul id="ttHi"></ul>
+    </div>
+    <div class="box lowlights">
+      <h3>Lowlights</h3>
+      <ul id="ttLo"></ul>
+    </div>
+  </div>
+  <p class="note">Source: SM and TT BDR Report — June 2026.xlsx ("Overall" tab). Each month is colored against that month's own goal.</p>
+</div>
+
+<!-- PAGE 4: Monthly Goal History -->
+<div class="page">
+  <h1>Monthly Goal Summary</h1>
+  <p class="subtitle">Tenant Turner &amp; ShowMojo — January 2025 through June 2026</p>
+  <hr class="hr">
+
+  <p class="section-title tt"><span class="logo-dot tt"></span>Tenant Turner</p>
+  <table class="table-tt">
+    <thead>
+      <tr><th>Month</th><th>RPC Connect Rate</th><th>RPC→Demo Conv. Rate</th><th>Booked Demos</th><th>Held</th><th>Showing Rate</th><th>Sales</th><th>Sale Conv. Rate</th><th>ARR</th></tr>
+    </thead>
+    <tbody>
+      <tr><td class="metric">Jun 2026</td><td>6%</td><td>10%</td><td>63</td><td>30</td><td>48%</td><td>5</td><td>16.2%</td><td>$15,752.29</td></tr>
+      <tr><td class="metric">May 2026</td><td>6%</td><td>10%</td><td>78</td><td>37</td><td>48%</td><td>6</td><td>16%</td><td>$18,903.00</td></tr>
+      <tr><td class="metric">Apr 2026</td><td>6%</td><td>10%</td><td>60</td><td>29</td><td>48%</td><td>5</td><td>16%</td><td>$15,752.29</td></tr>
+      <tr><td class="metric">Mar 2026</td><td>6%</td><td>10%</td><td>69</td><td>33</td><td>48%</td><td>5</td><td>16.2%</td><td>$15,752.29</td></tr>
+      <tr><td class="metric">Feb 2026</td><td>6%</td><td>10%</td><td>83</td><td>40</td><td>48%</td><td>6</td><td>16.2%</td><td>$18,093.00</td></tr>
+      <tr><td class="metric">Jan 2026</td><td>6%</td><td>10%</td><td>53</td><td>25</td><td>48%</td><td>5</td><td>15%</td><td>$12,601.83</td></tr>
+      <tr><td class="metric">Dec 2025</td><td>6%</td><td>10%</td><td>76</td><td>34</td><td>45%</td><td>5</td><td>15%</td><td>$12,096</td></tr>
+      <tr><td class="metric">Nov 2025</td><td>–</td><td>–</td><td>89</td><td>40</td><td>45%</td><td>6</td><td>15%</td><td>$22,950</td></tr>
+      <tr><td class="metric">Oct 2025</td><td>–</td><td>–</td><td>89</td><td>40</td><td>45%</td><td>6</td><td>15%</td><td>$22,950</td></tr>
+      <tr><td class="metric">Sep 2025</td><td>–</td><td>–</td><td>82</td><td>39</td><td>54%</td><td>6</td><td>10%</td><td>$19,550</td></tr>
+      <tr><td class="metric">Aug 2025</td><td>–</td><td>–</td><td>63</td><td>38</td><td>54%</td><td>5</td><td>10%</td><td>$18,750</td></tr>
+      <tr><td class="metric">Jul 2025</td><td>–</td><td>–</td><td>55</td><td>30</td><td>54%</td><td>4</td><td>17%</td><td>$15,000</td></tr>
+      <tr><td class="metric">Jun 2025</td><td>–</td><td>–</td><td>53</td><td>29</td><td>54%</td><td>4</td><td>10%</td><td>$14,500</td></tr>
+      <tr><td class="metric">May 2025</td><td>–</td><td>–</td><td>70</td><td>31</td><td>55%</td><td>6</td><td>10%</td><td>$20,000</td></tr>
+      <tr><td class="metric">Apr 2025</td><td>–</td><td>–</td><td>87</td><td>39</td><td>54%</td><td>6</td><td>14%</td><td>$19,500</td></tr>
+      <tr><td class="metric">Mar 2025</td><td>–</td><td>–</td><td>66</td><td>36</td><td>54%</td><td>5</td><td>14%</td><td>$16,500</td></tr>
+      <tr><td class="metric">Feb 2025</td><td>–</td><td>–</td><td>60</td><td>33</td><td>55%</td><td>5</td><td>–</td><td>$16,500</td></tr>
+      <tr><td class="metric">Jan 2025</td><td>–</td><td>–</td><td>60</td><td>33</td><td>55%</td><td>5</td><td>–</td><td>$16,500</td></tr>
+    </tbody>
+  </table>
+
+  <p class="section-title sm"><span class="logo-dot sm"></span>ShowMojo</p>
+  <table class="table-sm">
+    <thead>
+      <tr><th>Month</th><th>RPC Connect Rate</th><th>RPC→Demo Conv. Rate</th><th>Booked Demos</th><th>Held</th><th>Showing Rate</th><th>Sales</th><th>Sale Conv. Rate</th><th>ARR</th></tr>
+    </thead>
+    <tbody>
+      <tr><td class="metric">Jun 2026</td><td>6%</td><td>10%</td><td>35</td><td>18</td><td>51%</td><td>9</td><td>17.3%</td><td>$13,808.00</td></tr>
+      <tr><td class="metric">May 2026</td><td>6%</td><td>10%</td><td>83</td><td>42</td><td>51%</td><td>9</td><td>17%</td><td>$30,843.00</td></tr>
+      <tr><td class="metric">Apr 2026</td><td>6%</td><td>10%</td><td>134</td><td>68</td><td>51%</td><td>14</td><td>17%</td><td>$47,978.00</td></tr>
+      <tr><td class="metric">Mar 2026</td><td>6%</td><td>10%</td><td>124</td><td>63</td><td>51%</td><td>13</td><td>17.3%</td><td>$44,551.00</td></tr>
+      <tr><td class="metric">Feb 2026</td><td>6%</td><td>10%</td><td>132</td><td>67</td><td>51%</td><td>13</td><td>17.3%</td><td>$47,978.00</td></tr>
+      <tr><td class="metric">Jan 2026</td><td>6%</td><td>10%</td><td>102</td><td>52</td><td>51%</td><td>11</td><td>15%</td><td>$37,697.00</td></tr>
+      <tr><td class="metric">Dec 2025</td><td>6%</td><td>10%</td><td>76</td><td>34</td><td>45%</td><td>5</td><td>15%</td><td>$12,096</td></tr>
+      <tr><td class="metric">Nov 2025</td><td>–</td><td>–</td><td>89</td><td>40</td><td>45%</td><td>6</td><td>15%</td><td>$22,950</td></tr>
+      <tr><td class="metric">Oct 2025</td><td>–</td><td>–</td><td>89</td><td>40</td><td>45%</td><td>6</td><td>15%</td><td>$22,950</td></tr>
+      <tr><td class="metric">Sep 2025</td><td>–</td><td>–</td><td>96</td><td>43</td><td>45%</td><td>8</td><td>17%</td><td>$24,000</td></tr>
+      <tr><td class="metric">Aug 2025</td><td>–</td><td>–</td><td>59</td><td>32</td><td>45%</td><td>6</td><td>17%</td><td>$18,000</td></tr>
+      <tr><td class="metric">Jul 2025</td><td>–</td><td>–</td><td>44</td><td>24</td><td>45%</td><td>4</td><td>17%</td><td>$13,500</td></tr>
+      <tr><td class="metric">Jun 2025</td><td>–</td><td>–</td><td>44</td><td>24</td><td>45%</td><td>4</td><td>17%</td><td>$13,500</td></tr>
+      <tr><td class="metric">May 2025</td><td>–</td><td>–</td><td>80</td><td>36</td><td>45%</td><td>7</td><td>17%</td><td>$20,000</td></tr>
+      <tr><td class="metric">Apr 2025</td><td>–</td><td>–</td><td>107</td><td>43</td><td>45%</td><td>6</td><td>12%</td><td>$19,500</td></tr>
+      <tr><td class="metric">Mar 2025</td><td>–</td><td>–</td><td>132</td><td>59</td><td>45%</td><td>6</td><td>12%</td><td>$18,000</td></tr>
+      <tr><td class="metric">Feb 2025</td><td>–</td><td>–</td><td>106</td><td>48</td><td>45%</td><td>5</td><td>–</td><td>$26,400</td></tr>
+      <tr><td class="metric">Jan 2025</td><td>–</td><td>–</td><td>106</td><td>48</td><td>45%</td><td>5</td><td>–</td><td>$26,400</td></tr>
+    </tbody>
+  </table>
+  <p class="note">"–" = not tracked/provided for that month. RPC Connect Rate and RPC→Demo Conversion Rate goals only became available starting Dec 2025.</p>
+</div>
+
+<script>
+  // months ordered most-recent-first
+  var MONTHS = ["Jun 2026","May 2026","Apr 2026","Mar 2026","Feb 2026","Jan 2026","Dec 2025","Nov 2025","Oct 2025","Sep 2025","Aug 2025","Jul 2025","Jun 2025","May 2025","Apr 2025","Mar 2025","Feb 2025","Jan 2025"];
+
+  function parseArr(v){
+    if (typeof v === "number") return v;
+    if (v == null) return null;
+    var n = parseFloat(String(v).replace(/[$,\s]/g,""));
+    return isNaN(n) ? null : n;
+  }
+
+  // Actuals pulled from "Overall" tab of SM and TT BDR Report - June 2026.xlsx
+  var ACTUALS = {
+    TT: {
+      demos:[96,82,82,48,37,48,54,52,58,56,72,87,67,67,76,75,86,71],
+      held:[45,39,32,23,18,23,21,24,33,17,33,40,31,28,30,28,46,39],
+      rpcDemo:[0.10654827968923418,0.10366624525916561,0.10224438902743142,0.10457516339869281,0.09046454767726161,0.09856262833675565,0.08737864077669903,0.11607142857142858,0.10642201834862386,0.058394160583941604,0.0594059405940594,0.09753363228699552,0.05620805369127517,0.1111111111111111,0.2159090909090909,0.352112676056338,0.3481781376518219,0.20943952802359883],
+      showing:[0.4411764705882353,0.4431818181818182,0.42105263157894735,0.5111111111111111,0.4186046511627907,0.46938775510204084,0.35,0.42105263157894735,0.515625,0.32075471698113206,0.4782608695652174,0.45454545454545453,0.45588235294117646,0.4117647058823529,0.38461538461538464,0.4444444444444444,0.647887323943662,0.6842105263157895],
+      sales:[5,5,4,3,6,6,2,7,4,3,2,4,7,4,4,9,6,3],
+      salesConv:[0.1111111111111111,0.1282051282051282,0.125,0.13043478260869565,0.3333333333333333,0.2608695652173913,0.09523809523809523,0.2916666666666667,0.12121212121212122,0.17647058823529413,0.06060606060606061,0.1,0.22580645161290322,0.14285714285714285,0.13333333333333333,0.32142857142857145,0.13043478260869565,0.07692307692307693],
+      arr:[11144,11891.4,21957.6,9444,16668,15329,6792,17820,7836,3852,3972,12763.2,17343,6942,16835.8,27207,"$15,475 ","$20,436 "].map(parseArr)
+    },
+    SM: {
+      demos:[108,87,81,53,51,76,65,69,91,59,85,87,72,94,107,140,103,130],
+      held:[56,35,32,29,29,37,23,46,41,29,56,43,26,50,51,51,48,49],
+      rpcDemo:[0.10046511627906977,0.09942857142857142,0.10087173100871731,0.08967851099830795,0.09568480300187618,0.10584958217270195,0.07629107981220658,0.08723135271807839,0.08809293320425944,0.04800650935720097,0.06296296296296296,0.0651685393258427,0.048879837067209775,0.0817391304347826,0.10710710710710711,0.25,0.13570487483530963,0.1752021563342318],
+      showing:[0.47058823529411764,0.3723404255319149,0.4507042253521127,0.46774193548387094,0.5272727272727272,0.47435897435897434,0.3484848484848485,0.5974025974025974,0.47674418604651164,0.453125,0.5137614678899083,0.5058823529411764,0.4,0.5050505050505051,0.42857142857142855,0.40476190476190477,0.4897959183673469,0.4152542372881356],
+      sales:[10,5,3,5,4,4,3,8,11,9,9,3,5,9,11,7,2,9],
+      salesConv:[0.17857142857142858,0.14285714285714285,0.09375,0.1724137931034483,0.13793103448275862,0.10810810810810811,0.13043478260869565,0.17391304347826086,0.2682926829268293,0.3103448275862069,0.16071428571428573,0.06976744186046512,0.19230769230769232,0.18,0.21568627450980393,0.13725490196078433,0.041666666666666664,0.1836734693877551],
+      arr:[27670.04,13098,15363.56,11449.2,6897,"$7,805",12849,27066.5,43826,28358.25,33657.3,7998,9186,53068.8,28796,18793.6,"$5,232 ",30019].map(parseArr)
+    }
+  };
+
+  // Goals supplied manually (only available Jan 2025 - Jun 2026; RPC goals only from Dec 2025 onward)
+  var GOALS = {
+    TT: {
+      demos:[63,78,60,69,83,53,76,89,89,82,63,55,53,70,87,66,60,60],
+      held:[30,37,29,33,40,25,34,40,40,39,38,30,29,31,39,36,33,33],
+      showing:[.48,.48,.48,.48,.48,.48,.45,.45,.45,.54,.54,.54,.54,.55,.54,.54,.55,.55],
+      sales:[5,6,5,5,6,5,5,6,6,6,5,4,4,6,6,5,5,5],
+      salesConv:[.162,.16,.16,.162,.162,.15,.15,.15,.15,.10,.10,.17,.10,.10,.14,.14,null,null],
+      arr:[15752.29,18903.00,15752.29,15752.29,18093.00,12601.83,12096,22950,22950,19550,18750,15000,14500,20000,19500,16500,16500,16500],
+      rpcDemo:[.10,.10,.10,.10,.10,.10,.10,null,null,null,null,null,null,null,null,null,null,null]
+    },
+    SM: {
+      demos:[35,83,134,124,132,102,76,89,89,96,59,44,44,80,107,132,106,106],
+      held:[18,42,68,63,67,52,34,40,40,43,32,24,24,36,43,59,48,48],
+      showing:[.51,.51,.51,.51,.51,.51,.45,.45,.45,.45,.45,.45,.45,.45,.45,.45,.45,.45],
+      sales:[9,9,14,13,13,11,5,6,6,8,6,4,4,7,6,6,5,5],
+      salesConv:[.173,.17,.17,.173,.173,.15,.15,.15,.15,.17,.17,.17,.17,.17,.12,.12,null,null],
+      arr:[13808.00,30843.00,47978.00,44551.00,47978.00,37697.00,12096,22950,22950,24000,18000,13500,13500,20000,19500,18000,26400,26400],
+      rpcDemo:[.10,.10,.10,.10,.10,.10,.10,null,null,null,null,null,null,null,null,null,null,null]
+    }
+  };
+
+  function pct(actual, goal){ return goal ? Math.round(100*actual/goal) : null; }
+  function fmtPct(v){ return Math.round(v*100)+"%"; }
+  function fmtMoney(v){ return "$"+Math.round(v).toLocaleString(); }
+  function cls(actual, goal){ if (goal==null) return ""; return actual>=goal ? "good" : "bad"; }
+  // for rate metrics, compare rounded whole-percent values so e.g. 9.94% vs 10% goal reads as "met"
+  function rateCls(actual, goal){ if (goal==null) return ""; return Math.round(actual*100)>=Math.round(goal*100) ? "good" : "bad"; }
+
+  function card(label, valueStr, goalStr, klass, brand){
+    var brandCls = brand ? ' brand-'+brand : '';
+    var dot = brand ? '<span class="logo-dot '+brand+'"></span>' : '';
+    return '<div class="card'+brandCls+'"><div class="bar '+(klass||"")+'"></div><div class="label">'+dot+label+'</div>'+
+      '<div class="value '+(klass||"")+'">'+valueStr+'</div>'+
+      (goalStr ? '<div class="goal">'+goalStr+'</div>' : '<div class="goal">&nbsp;</div>')+'</div>';
+  }
+
+  function render(i){
+    var month = MONTHS[i];
+    document.getElementById('overviewTitle').textContent = month + " — KPI Overview";
+
+    var tt = ACTUALS.TT, sm = ACTUALS.SM, gTT = GOALS.TT, gSM = GOALS.SM;
+
+    var demos = tt.demos[i] + sm.demos[i];
+    var goalDemos = gTT.demos[i] + gSM.demos[i];
+    var held = tt.held[i] + sm.held[i];
+    var goalHeld = gTT.held[i] + gSM.held[i];
+    var sales = tt.sales[i] + sm.sales[i];
+    var goalSales = gTT.sales[i] + gSM.sales[i];
+    var arr = tt.arr[i] + sm.arr[i];
+    var goalArr = gTT.arr[i] + gSM.arr[i];
+
+    var rpcSM = sm.rpcDemo[i], rpcSMgoal = gSM.rpcDemo[i];
+    var rpcTT = tt.rpcDemo[i], rpcTTgoal = gTT.rpcDemo[i];
+    var showSM = sm.showing[i], showSMgoal = gSM.showing[i];
+    var showTT = tt.showing[i], showTTgoal = gTT.showing[i];
+
+    var html = "";
+    html += card("Booked Demos", demos, "Goal: "+goalDemos+" ("+pct(demos,goalDemos)+"%)", cls(demos,goalDemos));
+    html += card("Demos Held", held, "Goal: "+goalHeld+" ("+pct(held,goalHeld)+"%)", cls(held,goalHeld));
+    html += card("Total Sales", sales, "Goal: "+goalSales+" ("+pct(sales,goalSales)+"%)", cls(sales,goalSales));
+    html += card("Total ARR", fmtMoney(arr), "Goal: "+fmtMoney(goalArr)+" ("+pct(arr,goalArr)+"%)", cls(arr,goalArr));
+    html += card("RPC Conv. Rate — SM", fmtPct(rpcSM), rpcSMgoal!=null ? "Goal: "+fmtPct(rpcSMgoal) : "Goal: n/a", rateCls(rpcSM,rpcSMgoal), "sm");
+    html += card("RPC Conv. Rate — TT", fmtPct(rpcTT), rpcTTgoal!=null ? "Goal: "+fmtPct(rpcTTgoal) : "Goal: n/a", rateCls(rpcTT,rpcTTgoal), "tt");
+    html += card("Showing Rate — SM", fmtPct(showSM), showSMgoal!=null ? "Goal: "+fmtPct(showSMgoal) : "Goal: n/a", rateCls(showSM,showSMgoal), "sm");
+    html += card("Showing Rate — TT", fmtPct(showTT), showTTgoal!=null ? "Goal: "+fmtPct(showTTgoal) : "Goal: n/a", rateCls(showTT,showTTgoal), "tt");
+    document.getElementById('cardGrid').innerHTML = html;
+
+    // Context bullets — compare vs prior month (i+1, since array is most-recent-first)
+    var bullets = [];
+    if (i+1 < MONTHS.length){
+      var prevMonth = MONTHS[i+1];
+      var pDemos = tt.demos[i+1]+sm.demos[i+1];
+      var pHeld = tt.held[i+1]+sm.held[i+1];
+      var pSales = tt.sales[i+1]+sm.sales[i+1];
+      var pArr = tt.arr[i+1]+sm.arr[i+1];
+      var chg = function(cur,prev){ return prev ? Math.round(100*(cur-prev)/prev) : null; };
+      var dDemos = chg(demos,pDemos), dHeld = chg(held,pHeld), dSales = chg(sales,pSales), dArr = chg(arr,pArr);
+
+      bullets.push("Booked demos "+(pct(demos,goalDemos)>=100?"cleared":"came in at")+" "+pct(demos,goalDemos)+"% of goal"+(dDemos!=null?", "+(dDemos>=0?"up ":"down ")+Math.abs(dDemos)+"% vs. "+prevMonth+" ("+pDemos+")":"")+".");
+      bullets.push("Demos held reached "+pct(held,goalHeld)+"% of goal"+(dHeld!=null?", "+(dHeld>=0?"up ":"down ")+Math.abs(dHeld)+"% vs. "+prevMonth:"")+".");
+      bullets.push("Total sales "+(pct(sales,goalSales)>=100?"exceeded":"missed")+" goal at "+pct(sales,goalSales)+"%"+(dSales!=null?", "+(dSales>=0?"up ":"down ")+Math.abs(dSales)+"% vs. "+prevMonth+" ("+pSales+" → "+sales+")":"")+".");
+      bullets.push("ARR "+(pct(arr,goalArr)>=100?"cleared":"missed")+" goal at "+pct(arr,goalArr)+"%"+(dArr!=null?", "+(dArr>=0?"up ":"down ")+Math.abs(dArr)+"% vs. "+prevMonth+" ("+fmtMoney(pArr)+" → "+fmtMoney(arr)+")":"")+".");
+    } else {
+      bullets.push("Booked demos at "+pct(demos,goalDemos)+"% of goal ("+demos+" vs. "+goalDemos+").");
+      bullets.push("Demos held at "+pct(held,goalHeld)+"% of goal ("+held+" vs. "+goalHeld+").");
+      bullets.push("Total sales at "+pct(sales,goalSales)+"% of goal ("+sales+" vs. "+goalSales+").");
+      bullets.push("ARR at "+pct(arr,goalArr)+"% of goal ("+fmtMoney(arr)+" vs. "+fmtMoney(goalArr)+").");
+    }
+    var showSMok = showSMgoal!=null && Math.round(showSM*100)>=Math.round(showSMgoal*100);
+    var showTTok = showTTgoal!=null && Math.round(showTT*100)>=Math.round(showTTgoal*100);
+    bullets.push("Showing rate — SM "+fmtPct(showSM)+(showSMgoal!=null?" vs. "+fmtPct(showSMgoal)+" goal ("+(showSMok?"met":"missed")+")":"")+"; TT "+fmtPct(showTT)+(showTTgoal!=null?" vs. "+fmtPct(showTTgoal)+" goal ("+(showTTok?"met":"missed")+")":"")+".");
+
+    document.getElementById('contextBox').innerHTML = "⚠️ <strong>Context:</strong><ul>" + bullets.map(function(b){return "<li>"+b+"</li>";}).join("") + "</ul>";
+  }
+
+  // ---- Per-company KPI Analysis tables (ShowMojo / Tenant Turner) ----
+  var METRICS = [
+    {key:'demos',     label:'Booked Demos',     type:'count'},
+    {key:'held',      label:'Demos Held',       type:'count'},
+    {key:'rpcDemo',   label:'RPC Conv. Rate',   type:'rate'},
+    {key:'showing',   label:'Showing Rate',     type:'rate'},
+    {key:'sales',     label:'Sales',            type:'count'},
+    {key:'salesConv', label:'Sales Conv. Rate', type:'rate'},
+    {key:'arr',       label:'ARR',              type:'money'}
+  ];
+
+  function at(arr, idx){ return (idx>=0 && idx<arr.length) ? arr[idx] : null; }
+  function fmt(type, v){
+    if (v==null) return "N/A";
+    if (type==='rate') return fmtPct(v);
+    if (type==='money') return fmtMoney(v);
+    return String(v);
+  }
+  function cellCls(type, actual, goal){
+    if (actual==null || goal==null) return "neutral";
+    return (type==='rate' ? rateCls(actual, goal) : cls(actual, goal)) || "neutral";
+  }
+
+  function renderCompanyAnalysis(companyKey, prefix, displayName, i){
+    var A = ACTUALS[companyKey], G = GOALS[companyKey];
+    var i0 = i+2, i1 = i+1, i2 = i; // oldest -> newest, 3-month trend ending at selected month
+    var m0 = at(MONTHS, i0===undefined?null:(i0<MONTHS.length?i0:null));
+    var label0 = (i0<MONTHS.length) ? MONTHS[i0] : "N/A";
+    var label1 = (i1<MONTHS.length) ? MONTHS[i1] : "N/A";
+    var label2 = MONTHS[i2];
+    var yearAgoIdx = i2+12;
+    var yearAgoLabel = (yearAgoIdx<MONTHS.length) ? MONTHS[yearAgoIdx] : null;
+
+    document.getElementById(prefix+'-subtitle').textContent = label0+" · "+label1+" · "+label2+" vs. Goal";
+    document.getElementById(prefix+'-h0').textContent = label0;
+    document.getElementById(prefix+'-h1').textContent = label1;
+    document.getElementById(prefix+'-h2').textContent = label2;
+    document.getElementById(prefix+'-hgoal').textContent = label2+" Goal";
+    document.getElementById(prefix+'-hyr').textContent = yearAgoLabel || "Year Ago";
+
+    var rowsHtml = "";
+    var highlights = [], lowlights = [];
+
+    METRICS.forEach(function(m){
+      var v0 = at(A[m.key], i0), v1 = at(A[m.key], i1), v2 = at(A[m.key], i2);
+      var g0 = at(G[m.key], i0), g1 = at(G[m.key], i1), g2 = at(G[m.key], i2);
+      var vYear = yearAgoLabel!=null ? at(A[m.key], yearAgoIdx) : null;
+
+      rowsHtml += '<tr><td class="metric">'+m.label+'</td>'+
+        '<td class="'+cellCls(m.type,v0,g0)+'">'+fmt(m.type,v0)+'</td>'+
+        '<td class="'+cellCls(m.type,v1,g1)+'">'+fmt(m.type,v1)+'</td>'+
+        '<td class="'+cellCls(m.type,v2,g2)+'">'+fmt(m.type,v2)+'</td>'+
+        '<td>'+fmt(m.type,g2)+'</td>'+
+        '<td>'+fmt(m.type,vYear)+'</td></tr>';
+
+      if (v2!=null && g2!=null){
+        var met = (m.type==='rate') ? Math.round(v2*100)>=Math.round(g2*100) : v2>=g2;
+        var trendTxt = "";
+        if (v1!=null){
+          var upDown = v2>=v1 ? "up from" : "down from";
+          trendTxt = " ("+fmt(m.type,v2)+" vs. "+fmt(m.type,g2)+" goal, "+upDown+" "+fmt(m.type,v1)+" in "+label1+")";
+        } else {
+          trendTxt = " ("+fmt(m.type,v2)+" vs. "+fmt(m.type,g2)+" goal)";
+        }
+        var line = m.label+(met?" met/exceeded goal in "+label2:" missed goal in "+label2)+trendTxt+".";
+        (met ? highlights : lowlights).push(line);
+      }
+    });
+
+    document.getElementById(prefix+'Body').innerHTML = rowsHtml;
+    document.getElementById(prefix+'Hi').innerHTML = highlights.length ? highlights.map(function(b){return "<li>"+b+"</li>";}).join("") : "<li>No metrics cleared goal this month.</li>";
+    document.getElementById(prefix+'Lo').innerHTML = lowlights.length ? lowlights.map(function(b){return "<li>"+b+"</li>";}).join("") : "<li>No metrics missed goal this month.</li>";
+  }
+
+  function renderAll(i){
+    render(i);
+    renderCompanyAnalysis('SM','sm','ShowMojo', i);
+    renderCompanyAnalysis('TT','tt','Tenant Turner', i);
+  }
+
+  var sel = document.getElementById('monthSelect');
+  MONTHS.forEach(function(m, idx){
+    var opt = document.createElement('option');
+    opt.value = idx; opt.textContent = m;
+    sel.appendChild(opt);
+  });
+  sel.addEventListener('change', function(){ renderAll(parseInt(this.value,10)); });
+  renderAll(0);
+</script>
+</body>
+</html>
